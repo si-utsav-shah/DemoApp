@@ -1,0 +1,25 @@
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Trigger Parent App Build on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch to parent app repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CROSS_REPO_PAT }}
+          repository: si-utsav-shah/DemoApp/tree/main
+          event-type: sdk-pr-build
+          client-payload: |
+            {
+              "sdk_branch": "${{ github.head_ref }}",
+              "sdk_sha": "${{ github.event.pull_request.head.sha }}",
+              "pr_number": "${{ github.event.pull_request.number }}"
+            }
